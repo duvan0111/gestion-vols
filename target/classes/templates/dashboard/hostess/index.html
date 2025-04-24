@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head(~{::title})">
+    <title>Tableau de bord - Hôtesse</title>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div th:replace="layout/base :: header"></div>
+    
+    <div class="flex h-screen">
+        <div th:replace="layout/base :: sidebar"></div>
+        
+        <main class="flex-1 p-6 overflow-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Bienvenue, <span sec:authentication="name"></span></h1>
+                <p class="text-gray-600">Tableau de bord de l'hôtesse</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Carte pour les billets -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Gestion des billets</h2>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-ticket-alt text-blue-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">Gérer les billets, vendre de nouveaux billets et consulter les billets existants.</p>
+                    <a href="/dashboard/hostess/tickets" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+                        Accéder
+                    </a>
+                </div>
+                
+                <!-- Carte pour les enregistrements -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Enregistrements</h2>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-clipboard-check text-green-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">Gérer les enregistrements des passagers et les suppléments bagages.</p>
+                    <a href="/dashboard/hostess/check-ins" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">
+                        Accéder
+                    </a>
+                </div>
+                
+                <!-- Carte pour les statistiques -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Statistiques</h2>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-chart-line text-purple-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">Consulter les statistiques des ventes de billets et des enregistrements.</p>
+                    <button class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded">
+                        Bientôt disponible
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Section des vols ouverts à l'enregistrement -->
+            <div class="mt-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Vols ouverts à l'enregistrement</h2>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 bg-gray-50 border-b">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-700">Vols récents</h3>
+                            <a href="/dashboard/hostess/check-ins" class="text-blue-600 hover:text-blue-800">
+                                Voir tous <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-gray-600 text-center py-4">Chargement des données...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
