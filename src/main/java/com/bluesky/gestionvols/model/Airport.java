@@ -24,6 +24,12 @@ public class Airport {
     
     private String state;
     
+    private String code;
+    
+    private String country;
+    
+    private String continent;
+    
     @OneToMany(mappedBy = "departureAirport")
     private List<Flight> departureFlights;
     

@@ -20,6 +20,8 @@ public class Compagnie {
     
     private String name;
     
+    private String country;
+    
     @OneToMany(mappedBy = "compagnie")
     private List<Aeroplane> aeroplanes;
 }

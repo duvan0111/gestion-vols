@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Blue Sky - Enregistrements du Vol</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div th:replace="~{layout/base :: hostess-sidebar}"></div>
+        
+        <div class="content">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-3xl font-bold">Enregistrements - Vol <span th:text="${flight.flightNr}"></span></h1>
+                    <a th:href="@{/hostess/check-in}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Retour
+                    </a>
+                </div>
+                
+                <div th:if="${param.error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline" th:text="${param.error}"></span>
+                </div>
+                
+                <div th:if="${param.success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline" th:text="${param.success}"></span>
+                </div>
+                
+                <!-- Informations du vol -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-700">Informations du vol</h2>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Départ</p>
+                            <p class="mt-1 text-lg text-gray-900">
+                                <span th:text="${flight.departureAirport.code}"></span> - 
+                                <span th:text="${flight.departureAirport.city}"></span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Arrivée</p>
+                            <p class="mt-1 text-lg text-gray-900">
+                                <span th:text="${flight.arrivalAirport.code}"></span> - 
+                                <span th:text="${flight.arrivalAirport.city}"></span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Date/Heure</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${#temporals.format(flight.depTime, 'dd/MM/yyyy HH:mm')}"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Compagnie</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${flight.aeroplane.compagnie.name}"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Avion</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${flight.aeroplane.model}"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Places disponibles</p>
+                            <p class="mt-1 text-lg text-gray-900">
+                                <span th:text="${availableSeats}"></span> / <span th:text="${flight.aeroplane.capacity}"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Liste des passagers enregistrés -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-700">Passagers enregistrés</h2>
+                        <a th:href="@{/hostess/check-in/passenger-list/{id}(id=${flight.id})}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm">
+                            Imprimer liste
+                        </a>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Billet</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Passager</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siège</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bagages</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heure d'enregistrement</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr th:each="checkIn : ${checkIns}" class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" th:text="${checkIn.ticket.id}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span th:text="${checkIn.ticket.client.lastName}"></span> 
+                                        <span th:text="${checkIn.ticket.client.firstName}"></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${checkIn.seat}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${checkIn.luggageNr}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${#temporals.format(checkIn.checkTime, 'dd/MM/yyyy HH:mm')}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a th:href="@{/hostess/check-in/edit/{id}(id=${checkIn.ticket.id})}" class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</a>
+                                        <a th:href="@{/hostess/check-in/delete/{id}(id=${checkIn.ticket.id})}" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet enregistrement ?')">Supprimer</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${checkIns.empty}">
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Aucun passager enregistré</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Billets disponibles pour enregistrement -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-700">Billets disponibles pour enregistrement</h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Billet</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Passager</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'achat</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr th:each="ticket : ${availableTickets}" class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" th:text="${ticket.id}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span th:text="${ticket.client.lastName}"></span> 
+                                        <span th:text="${ticket.client.firstName}"></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${ticket.client.email}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${ticket.client.phone}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${#temporals.format(ticket.flightDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a th:href="@{/hostess/check-in/create/{flightId}/{ticketId}(flightId=${flight.id},ticketId=${ticket.id})}" class="text-green-600 hover:text-green-900">Enregistrer</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${availableTickets.empty}">
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Aucun billet disponible pour enregistrement</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

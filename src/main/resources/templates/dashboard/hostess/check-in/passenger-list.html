@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Blue Sky - Liste des Passagers</title>
+</head>
+<body>
+    <section th:fragment="content">
+        <div th:replace="~{layout/base :: hostess-sidebar}"></div>
+        
+        <div class="content">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-3xl font-bold">Liste des Passagers - Vol <span th:text="${flight.flightNr}"></span></h1>
+                    <div>
+                        <a th:href="@{/hostess/check-in/flight/{id}(id=${flight.id})}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
+                            Retour
+                        </a>
+                        <button onclick="window.print()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            Imprimer
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Informations du vol -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6 print:mb-4">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 print:py-2">
+                        <h2 class="text-xl font-semibold text-gray-700">Informations du vol</h2>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 print:p-4 print:grid-cols-3">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">N° Vol</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${flight.flightNr}"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Départ</p>
+                            <p class="mt-1 text-lg text-gray-900">
+                                <span th:text="${flight.departureAirport.code}"></span> - 
+                                <span th:text="${flight.departureAirport.city}"></span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Arrivée</p>
+                            <p class="mt-1 text-lg text-gray-900">
+                                <span th:text="${flight.arrivalAirport.code}"></span> - 
+                                <span th:text="${flight.arrivalAirport.city}"></span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Date/Heure</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${#temporals.format(flight.depTime, 'dd/MM/yyyy HH:mm')}"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Compagnie</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${flight.aeroplane.compagnie.name}"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Avion</p>
+                            <p class="mt-1 text-lg text-gray-900" th:text="${flight.aeroplane.model}"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Liste des passagers -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 print:py-2">
+                        <h2 class="text-xl font-semibold text-gray-700">Liste des passagers enregistrés</h2>
+                        <p class="text-sm text-gray-500 mt-1">Total: <span th:text="${checkIns.size()}"></span> passagers</p>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">N° Billet</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">Nom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">Prénom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">Siège</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">Bagages</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print:py-2">Téléphone</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr th:each="checkIn : ${checkIns}" class="hover:bg-gray-50 print:hover:bg-white">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 print:py-2" th:text="${checkIn.ticket.id}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 print:py-2" th:text="${checkIn.ticket.client.lastName}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 print:py-2" th:text="${checkIn.ticket.client.firstName}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 print:py-2" th:text="${checkIn.seat}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 print:py-2" th:text="${checkIn.luggageNr}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 print:py-2" th:text="${checkIn.ticket.client.email}"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 print:py-2" th:text="${checkIn.ticket.client.phone}"></td>
+                                </tr>
+                                <tr th:if="${checkIns.empty}">
+                                    <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 print:py-2">Aucun passager enregistré</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Pied de page pour l'impression -->
+                <div class="hidden print:block mt-8">
+                    <div class="text-center text-sm text-gray-500">
+                        <p>Document généré le <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span></p>
+                        <p>Blue Sky Airlines - Consortium de compagnies aériennes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Styles spécifiques pour l'impression -->
+        <style>
+            @media print {
+                body {
+                    font-size: 12pt;
+                }
+                .sidebar, .content > *:not(.container) {
+                    display: none;
+                }
+                .content {
+                    margin-left: 0;
+                    width: 100%;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                table, th, td {
+                    border: 1px solid #ddd;
+                }
+                th, td {
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+            }
+        </style>
+    </section>
+</body>
+</html>

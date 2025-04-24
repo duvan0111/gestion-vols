@@ -49,7 +49,7 @@ public class AuthController {
         if (auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HOSTESS"))) {
             return "redirect:/dashboard/hostess";
         } else if (auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGER"))) {
-            return "redirect:/dashboard/manager";
+            return "redirect:/manager";
         }
         
         return "redirect:/login";

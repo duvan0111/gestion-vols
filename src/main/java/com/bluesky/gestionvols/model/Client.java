@@ -18,9 +18,13 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    private String name;
+    private String lastName;
     
-    private String surname;
+    private String firstName;
+    
+    private String email;
+    
+    private String phone;
     
     @Column(unique = true)
     private String numPassport;

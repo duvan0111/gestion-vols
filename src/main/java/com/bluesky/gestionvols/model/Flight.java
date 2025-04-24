@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,12 +20,16 @@ public class Flight {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
+    private String flightNr;
+    
     private Boolean openBuy;
     
     private Boolean openRegistration;
     
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime depTime;
     
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime arrTime;
     
     @ManyToOne
