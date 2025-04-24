@@ -3,11 +3,15 @@ package com.bluesky.gestionvols.controller;
 import com.bluesky.gestionvols.model.Aeroplane;
 import com.bluesky.gestionvols.model.Airport;
 import com.bluesky.gestionvols.model.Flight;
+import com.bluesky.gestionvols.model.Ticket;
+import com.bluesky.gestionvols.model.CheckIn;
 import com.bluesky.gestionvols.repository.AeroplaneRepository;
 import com.bluesky.gestionvols.repository.AirportRepository;
 import com.bluesky.gestionvols.repository.CompagnieRepository;
 import com.bluesky.gestionvols.repository.FlightRepository;
 import com.bluesky.gestionvols.service.FlightService;
+import com.bluesky.gestionvols.service.TicketService;
+import com.bluesky.gestionvols.service.CheckInService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +24,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Comparator;
 
 @Controller
 @RequestMapping("/manager")
@@ -30,17 +36,23 @@ public class ManagerDashboardController {
     private final CompagnieRepository compagnieRepository;
     private final AirportRepository airportRepository;
     private final FlightService flightService;
+    private final TicketService ticketService;
+    private final CheckInService checkInService;
 
     public ManagerDashboardController(FlightRepository flightRepository, 
                                      AeroplaneRepository aeroplaneRepository,
                                      CompagnieRepository compagnieRepository,
                                      AirportRepository airportRepository,
-                                     FlightService flightService) {
+                                     FlightService flightService,
+                                     TicketService ticketService,
+                                     CheckInService checkInService) {
         this.flightRepository = flightRepository;
         this.aeroplaneRepository = aeroplaneRepository;
         this.compagnieRepository = compagnieRepository;
         this.airportRepository = airportRepository;
         this.flightService = flightService;
+        this.ticketService = ticketService;
+        this.checkInService = checkInService;
     }
 
     @GetMapping
@@ -49,6 +61,17 @@ public class ManagerDashboardController {
         model.addAttribute("aeroplanes", aeroplaneRepository.findAll());
         model.addAttribute("compagnies", compagnieRepository.findAll());
         model.addAttribute("pageTitle", "Tableau de bord - Responsable de vols");
+        // Statistiques dynamiques
+        model.addAttribute("totalFlights", flightRepository.count());
+        model.addAttribute("activePlanes", aeroplaneRepository.count());
+        model.addAttribute("totalCompanies", compagnieRepository.count());
+        // Vols récents
+        List<Flight> recentFlights = flightRepository.findByDepTimeAfter(LocalDateTime.now());
+        recentFlights.sort(Comparator.comparing(Flight::getDepTime));
+        if (recentFlights.size() > 5) {
+            recentFlights = recentFlights.subList(0, 5);
+        }
+        model.addAttribute("recentFlights", recentFlights);
         return "dashboard/manager/index";
     }
 
@@ -87,6 +110,10 @@ public class ManagerDashboardController {
         Flight flight = flightService.getFlightById(id)
                 .orElseThrow(() -> new RuntimeException("Vol non trouvé"));
         model.addAttribute("flight", flight);
+        List<Ticket> tickets = ticketService.getTicketsByFlightId(id);
+        model.addAttribute("tickets", tickets);
+        List<CheckIn> checkIns = checkInService.getCheckInsByFlightId(id);
+        model.addAttribute("checkIns", checkIns);
         return "dashboard/manager/flight-details";
     }
 
@@ -169,5 +196,33 @@ public class ManagerDashboardController {
         model.addAttribute("flight", flightRepository.findById(flightId).orElseThrow());
         model.addAttribute("pageTitle", "Liste des passagers");
         return "dashboard/manager/passenger-list";
+    }
+
+    @GetMapping("/flights/{id}/open-buy")
+    public String openBuy(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        flightService.openFlightForPurchase(id);
+        redirectAttributes.addFlashAttribute("success", "Vol ouvert à l'achat");
+        return "redirect:/manager/flights/{id}";
+    }
+
+    @GetMapping("/flights/{id}/close-buy")
+    public String closeBuy(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        flightService.closeFlightForPurchase(id);
+        redirectAttributes.addFlashAttribute("success", "Vol fermé à l'achat");
+        return "redirect:/manager/flights/{id}";
+    }
+
+    @GetMapping("/flights/{id}/open-registration")
+    public String openRegistration(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        flightService.openFlightForRegistration(id);
+        redirectAttributes.addFlashAttribute("success", "Enregistrement ouvert");
+        return "redirect:/manager/flights/{id}";
+    }
+
+    @GetMapping("/flights/{id}/close-registration")
+    public String closeRegistration(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        flightService.closeFlightForRegistration(id);
+        redirectAttributes.addFlashAttribute("success", "Enregistrement fermé");
+        return "redirect:/manager/flights/{id}";
     }
 }

@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <p class="text-gray-600 mb-4">Gérer les vols, ouvrir/fermer les vols à l'achat et à l'enregistrement.</p>
-                    <a href="/dashboard/manager/flights" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+                    <a href="/manager/flights" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
                         Accéder
                     </a>
                 </div>
@@ -39,7 +39,7 @@
                         </div>
                     </div>
                     <p class="text-gray-600 mb-4">Gérer la flotte d'avions des compagnies du consortium.</p>
-                    <a href="/dashboard/manager/aeroplanes" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">
+                    <a href="/manager/aeroplanes" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">
                         Accéder
                     </a>
                 </div>
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <p class="text-gray-600 mb-4">Gérer les compagnies aériennes du consortium Blue Sky.</p>
-                    <a href="/dashboard/manager/compagnies" class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded">
+                    <a href="/manager/compagnies" class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded">
                         Accéder
                     </a>
                 </div>
@@ -66,13 +66,25 @@
                     <div class="p-4 bg-gray-50 border-b">
                         <div class="flex justify-between items-center">
                             <h3 class="font-semibold text-gray-700">Derniers vols programmés</h3>
-                            <a href="/dashboard/manager/flights" class="text-blue-600 hover:text-blue-800">
+                            <a href="/manager/flights" class="text-blue-600 hover:text-blue-800">
                                 Voir tous <i class="fas fa-arrow-right ml-1"></i>
                             </a>
                         </div>
                     </div>
                     <div class="p-4">
-                        <p class="text-gray-600 text-center py-4">Chargement des données...</p>
+                        <div th:if="${recentFlights.isEmpty()}" class="text-gray-500 italic text-center py-4">Aucun vol récent.</div>
+                        <div th:if="${!recentFlights.isEmpty()}">
+                            <table class="min-w-full table-auto divide-y divide-gray-200">
+                                <thead class="bg-gray-50"><tr><th class="px-4 py-2">Vol</th><th class="px-4 py-2">Départ</th><th class="px-4 py-2">Arrivée</th></tr></thead>
+                                <tbody>
+                                    <tr th:each="f : ${recentFlights}" class="even:bg-gray-100">
+                                        <td class="px-4 py-2" th:text="${f.flightNr}"></td>
+                                        <td class="px-4 py-2" th:text="${#temporals.format(f.depTime,'dd/MM/yyyy HH:mm')}"></td>
+                                        <td class="px-4 py-2" th:text="${#temporals.format(f.arrTime,'dd/MM/yyyy HH:mm')}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -88,7 +100,7 @@
                                 <i class="fas fa-plane text-blue-600"></i>
                             </div>
                         </div>
-                        <p class="text-3xl font-bold text-gray-800">--</p>
+                        <p class="text-3xl font-bold text-gray-800" th:text="${totalFlights}">--</p>
                         <p class="text-sm text-gray-500">Vols programmés</p>
                     </div>
                     
@@ -99,7 +111,7 @@
                                 <i class="fas fa-plane-departure text-green-600"></i>
                             </div>
                         </div>
-                        <p class="text-3xl font-bold text-gray-800">--</p>
+                        <p class="text-3xl font-bold text-gray-800" th:text="${activePlanes}">--</p>
                         <p class="text-sm text-gray-500">Avions en service</p>
                     </div>
                     
@@ -110,7 +122,7 @@
                                 <i class="fas fa-building text-purple-600"></i>
                             </div>
                         </div>
-                        <p class="text-3xl font-bold text-gray-800">--</p>
+                        <p class="text-3xl font-bold text-gray-800" th:text="${totalCompanies}">--</p>
                         <p class="text-sm text-gray-500">Compagnies partenaires</p>
                     </div>
                 </div>
