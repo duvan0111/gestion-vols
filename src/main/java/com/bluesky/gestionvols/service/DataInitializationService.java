@@ -237,27 +237,29 @@ public class DataInitializationService {
     public void initializeClients() {
         List<Client> clients = new ArrayList<>();
         
-        clients.add(createClient("Dupont", "Jean", "jean.dupont@example.com", "+33123456789"));
-        clients.add(createClient("Martin", "Sophie", "sophie.martin@example.com", "+33234567890"));
-        clients.add(createClient("Smith", "John", "john.smith@example.com", "+44123456789"));
-        clients.add(createClient("Johnson", "Emily", "emily.johnson@example.com", "+44234567890"));
-        clients.add(createClient("Müller", "Hans", "hans.muller@example.com", "+49123456789"));
-        clients.add(createClient("Schmidt", "Anna", "anna.schmidt@example.com", "+49234567890"));
-        clients.add(createClient("Rossi", "Marco", "marco.rossi@example.com", "+39123456789"));
-        clients.add(createClient("Ferrari", "Laura", "laura.ferrari@example.com", "+39234567890"));
-        clients.add(createClient("Garcia", "Carlos", "carlos.garcia@example.com", "+34123456789"));
-        clients.add(createClient("Lopez", "Maria", "maria.lopez@example.com", "+34234567890"));
+        clients.add(createClient("Dupont", "Jean", "jean.dupont@example.com", "+33123456789", "A1234567", "M"));
+        clients.add(createClient("Martin", "Sophie", "sophie.martin@example.com", "+33234567890", "B1234567", "F"));
+        clients.add(createClient("Smith", "John", "john.smith@example.com", "+44123456789", "C1234567", "M"));
+        clients.add(createClient("Johnson", "Emily", "emily.johnson@example.com", "+44234567890", "D1234567", "F"));
+        clients.add(createClient("Müller", "Hans", "hans.muller@example.com", "+49123456789", "E1234567", "M"));
+        clients.add(createClient("Schmidt", "Anna", "anna.schmidt@example.com", "+49234567890", "F1234567", "F"));
+        clients.add(createClient("Rossi", "Marco", "marco.rossi@example.com", "+39123456789", "G1234567", "M"));
+        clients.add(createClient("Ferrari", "Laura", "laura.ferrari@example.com", "+39234567890", "H1234567", "F"));
+        clients.add(createClient("Garcia", "Carlos", "carlos.garcia@example.com", "+34123456789", "I1234567", "M"));
+        clients.add(createClient("Lopez", "Maria", "maria.lopez@example.com", "+34234567890", "J1234567", "F"));
         
         clientRepository.saveAll(clients);
         System.out.println("Clients initialisés : " + clients.size());
     }
 
-    private Client createClient(String lastName, String firstName, String email, String phone) {
+    private Client createClient(String lastName, String firstName, String email, String phone, String numPassport, String sex) {
         Client client = new Client();
         client.setLastName(lastName);
         client.setFirstName(firstName);
         client.setEmail(email);
         client.setPhone(phone);
+        client.setNumPassport(numPassport);
+        client.setSex(sex);
         return client;
     }
 
@@ -271,13 +273,13 @@ public class DataInitializationService {
         // Filtrer les utilisateurs pour ne garder que les managers
         List<User> managers = new ArrayList<>();
         for (User user : users) {
-            if ("MANAGER".equals(user.getRole())) {
+            if ("HOSTESS".equals(user.getRole())) {
                 managers.add(user);
             }
         }
         
         if (managers.isEmpty()) {
-            System.out.println("Aucun manager trouvé pour créer des billets");
+            System.out.println("Aucune hôtesse trouvée pour créer des billets");
             return;
         }
         

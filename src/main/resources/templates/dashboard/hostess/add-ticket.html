@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head(title=~{::title})">
+    <title>Ajouter un billet</title>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div th:replace="layout/base :: header"></div>
+    <div class="flex h-screen">
+        <div th:replace="layout/base :: sidebar-hostess"></div>
+        <main class="flex-1 p-6 overflow-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Ajouter un billet</h1>
+            </div>
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <form th:action="@{/dashboard/hostess/tickets}" th:object="${ticket}" method="post" class="space-y-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <!-- Sélection des aéroports de départ et d'arrivée -->
+                    <div>
+                        <label class="block text-gray-700">Aéroport de départ</label>
+                        <select id="departureSelect" class="w-full mt-1 p-2 border rounded" required>
+                            <option value="">-- Sélectionnez le départ --</option>
+                            <option th:each="a : ${airports}" th:value="${a.id}" th:text="${a.city + ' (' + a.code + ')'}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Aéroport d'arrivée</label>
+                        <select id="arrivalSelect" class="w-full mt-1 p-2 border rounded" required>
+                            <option value="">-- Sélectionnez l'arrivée --</option>
+                            <option th:each="a : ${airports}" th:value="${a.id}" th:text="${a.city + ' (' + a.code + ')'}"></option>
+                        </select>
+                    </div>
+                    <!-- Liste des vols disponibles -->
+                    <div id="flightsContainer" class="hidden">
+                        <label class="block text-gray-700">Vols disponibles</label>
+                        <div class="max-h-48 overflow-y-auto border p-2 rounded">
+                            <div th:each="f : ${flights}" th:if="${f.openBuy}" th:attr="data-dep=${f.departureAirport.id}, data-arr=${f.arrivalAirport.id}" class="hidden">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="flightIds" th:value="${f.id}" class="h-4 w-4 text-blue-600"/>
+                                    <span th:text="${f.flightNr + ' - ' + #temporals.format(f.depTime,'dd/MM/yyyy HH:mm') + ' → ' + #temporals.format(f.arrTime,'dd/MM/yyyy HH:mm')}"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Passager</label>
+                        <select th:field="*{client.id}" class="w-full mt-1 p-2 border rounded" required>
+                            <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.firstName + ' ' + c.lastName}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Enregistrer</button>
+                        <a th:href="@{/dashboard/hostess/tickets}" class="ml-2 text-gray-600 hover:underline">Annuler</a>
+                    </div>
+                </form>
+                <script th:inline="javascript">
+                /*<![CDATA[*/
+                const depSel = document.getElementById('departureSelect');
+                const arrSel = document.getElementById('arrivalSelect');
+                const flightsCon = document.getElementById('flightsContainer');
+                depSel.addEventListener('change', filterFlights);
+                arrSel.addEventListener('change', filterFlights);
+                function filterFlights() {
+                    const dep = depSel.value;
+                    const arr = arrSel.value;
+                    const els = flightsCon.querySelectorAll('[data-dep]');
+                    if(dep && arr) {
+                        flightsCon.classList.remove('hidden');
+                        els.forEach(el => {
+                            if(el.getAttribute('data-dep') === dep && el.getAttribute('data-arr') === arr) {
+                                el.classList.remove('hidden');
+                            } else {
+                                el.classList.add('hidden');
+                                el.querySelector('input[type=checkbox]').checked = false;
+                            }
+                        });
+                    } else {
+                        flightsCon.classList.add('hidden');
+                        els.forEach(el => { el.classList.add('hidden'); el.querySelector('input[type=checkbox]').checked = false; });
+                    }
+                }
+                /*]]>*/
+                </script>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

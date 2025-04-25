@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "tickets")
@@ -21,6 +22,7 @@ public class Ticket {
     
     private Float rate;
     
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime flightDate;
     
     @ManyToOne
