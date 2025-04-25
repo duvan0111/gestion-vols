@@ -1,0 +1,46 @@
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head(title=~{::title})">
+    <title>Enregistrements</title>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div th:replace="layout/base :: header"></div>
+    <div class="flex h-screen">
+        <div th:replace="layout/base :: sidebar-hostess"></div>
+        <main class="flex-1 p-6 overflow-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Enregistrements</h1>
+                <p class="text-gray-600">Vols ouverts à l'enregistrement</p>
+            </div>
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-700">Liste des vols</h2>
+                </div>
+                <div class="p-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vol</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date départ</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trajet</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="f : ${flights}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${f.id}">1</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${f.flightNr}">FL123</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${#temporals.format(f.depTime,'dd/MM/yyyy HH:mm')}">01/01/2025 12:00</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${f.departureAirport.city + ' → ' + f.arrivalAirport.city}">Paris → Lyon</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 space-x-2">
+                                    <a th:href="@{/dashboard/hostess/check-ins/{id}(id=${f.id})}" class="text-blue-500 hover:text-blue-700">Détails</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
