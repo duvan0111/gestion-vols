@@ -1,0 +1,35 @@
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head(title=~{::title})">
+    <title>Détail du billet</title>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div th:replace="layout/base :: header"></div>
+    <div class="flex h-screen">
+        <div th:replace="layout/base :: sidebar-hostess"></div>
+        <main class="flex-1 p-6 overflow-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Détail du billet</h1>
+            </div>
+            <div class="bg-white shadow-md rounded-lg p-6 space-y-4">
+                <p><strong>ID:</strong> <span th:text="${ticket.id}">1</span></p>
+                <p><strong>Date et heure:</strong> <span th:text="${#temporals.format(ticket.flightDate,'dd/MM/yyyy HH:mm')}">01/01/2025 12:00</span></p>
+                <p><strong>Prix:</strong> <span th:text="${ticket.rate}">100.0</span> €</p>
+                <p><strong>Passager:</strong> <span th:text="${ticket.client.firstName + ' ' + ticket.client.lastName}">Jean Dupont</span></p>
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-700">Segments du vol</h2>
+                    <ul class="list-disc pl-6">
+                        <li th:each="ft : ${ticket.flightTickets}">
+                            <span th:text="${ft.flight.flightNr + ' - ' + #temporals.format(ft.flight.depTime,'dd/MM/yyyy HH:mm') + ' → ' + #temporals.format(ft.flight.arrTime,'dd/MM/yyyy HH:mm')}">BL123 - 01/01/2025 12:00 → 01/01/2025 14:00</span>
+                            <span class="text-gray-500" th:text="|(${ft.flight.departureAirport.city} → ${ft.flight.arrivalAirport.city})|"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="space-x-2">
+                    <a th:href="@{/dashboard/hostess/tickets}" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded">Retour</a>
+                    <a th:href="@{/dashboard/hostess/tickets/{id}/edit(id=${ticket.id})}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Modifier</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
