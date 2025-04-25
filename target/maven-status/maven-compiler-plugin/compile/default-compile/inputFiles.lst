@@ -8,6 +8,7 @@
 /home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/repository/UserRepository.java
 /home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/service/FlightService.java
 /home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/service/TicketService.java
+/home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/config/DataInitRunner.java
 /home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/model/User.java
 /home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/repository/CompagnieRepository.java
 /home/dv-fk/Documents/School/Master 1 DS/S2/DS-INF4238 Business Intelligence et Big Data/TP/GestionVols/src/main/java/com/bluesky/gestionvols/GestionVolsApplication.java

@@ -20,7 +20,7 @@ public class CheckIn {
     private Integer seat;
     
     private Integer luggageNr;
-    
+    private Float baggageFee; // supplément bagage
     private LocalDateTime checkTime;
     
     @OneToOne

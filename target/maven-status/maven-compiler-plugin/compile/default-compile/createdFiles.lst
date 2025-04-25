@@ -10,7 +10,9 @@ com/bluesky/gestionvols/service/TicketService.class
 com/bluesky/gestionvols/service/UserService.class
 com/bluesky/gestionvols/controller/AuthController.class
 com/bluesky/gestionvols/config/SecurityConfig.class
+com/bluesky/gestionvols/config/DataInitRunner.class
 com/bluesky/gestionvols/service/CheckInService.class
+com/bluesky/gestionvols/service/DataInitializationService$1.class
 com/bluesky/gestionvols/model/User.class
 com/bluesky/gestionvols/repository/TicketRepository.class
 com/bluesky/gestionvols/model/Airport.class

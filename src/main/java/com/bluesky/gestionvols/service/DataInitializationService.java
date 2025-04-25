@@ -4,15 +4,18 @@ import com.bluesky.gestionvols.model.*;
 import com.bluesky.gestionvols.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
-@Service
+@Configuration
 public class DataInitializationService {
 
     private final CompagnieRepository compagnieRepository;
@@ -25,6 +28,7 @@ public class DataInitializationService {
     private final FlightTicketRepository flightTicketRepository;
     private final CheckInRepository checkInRepository;
     private final FlyingRepository flyingRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DataInitializationService(CompagnieRepository compagnieRepository,
                                     AeroplaneRepository aeroplaneRepository,
@@ -35,7 +39,8 @@ public class DataInitializationService {
                                     TicketRepository ticketRepository,
                                     FlightTicketRepository flightTicketRepository,
                                     CheckInRepository checkInRepository,
-                                    FlyingRepository flyingRepository) {
+                                    FlyingRepository flyingRepository,
+                                    PasswordEncoder passwordEncoder) {
         this.compagnieRepository = compagnieRepository;
         this.aeroplaneRepository = aeroplaneRepository;
         this.airportRepository = airportRepository;
@@ -46,28 +51,43 @@ public class DataInitializationService {
         this.flightTicketRepository = flightTicketRepository;
         this.checkInRepository = checkInRepository;
         this.flyingRepository = flyingRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
     public CommandLineRunner initializeData() {
-        return args -> {
-            // Vérifier si des données existent déjà
-            if (compagnieRepository.count() > 0) {
-                System.out.println("Les données de test existent déjà. Initialisation ignorée.");
-                return;
-            }
+        return new CommandLineRunner() {
+            @Override
+            @Transactional
+            public void run(String... args) {
+                // Purge des données existantes
+                System.out.println("Purge des données existantes...");
+                checkInRepository.deleteAll();
+                flightTicketRepository.deleteAll();
+                ticketRepository.deleteAll();
+                flyingRepository.deleteAll();
+                flightRepository.deleteAll();
+                aeroplaneRepository.deleteAll();
+                airportRepository.deleteAll();
+                compagnieRepository.deleteAll();
+                clientRepository.deleteAll();
+                userRepository.deleteAll();
 
-            System.out.println("Initialisation des données de test...");
-            
-            initializeCompagnies();
-            initializeAirports();
-            initializeAeroplanes();
-            initializeFlights();
-            initializeClients();
-            initializeTickets();
-            initializeCheckIns();
-            
-            System.out.println("Initialisation des données de test terminée.");
+                // Initialisation des données de base
+                System.out.println("Initialisation des données de base...");
+                initializeCompagnies();
+                initializeAirports();
+                initializeAeroplanes();
+                initializeFlights();
+                initializeClients();
+                initializeUsers();
+
+                // Initialisation des billets et des enregistrements de test
+                System.out.println("Initialisation des billets de test...");
+                initializeTickets();
+                System.out.println("Initialisation des enregistrements de test...");
+                initializeCheckIns();
+            }
         };
     }
 
@@ -263,24 +283,24 @@ public class DataInitializationService {
         
         Random random = new Random();
         
-        // Pour chaque client, créer quelques billets
         for (Client client : clients) {
             // Nombre aléatoire de billets par client (1 à 3)
             int nbTickets = 1 + random.nextInt(3);
-            
             for (int i = 0; i < nbTickets; i++) {
-                // Choisir un vol aléatoire
-                Flight flight = flights.get(random.nextInt(flights.size()));
-                
-                // Créer le billet si le vol est ouvert à l'achat
-                if (flight.getOpenBuy()) {
-                    User manager = managers.get(random.nextInt(managers.size()));
-                    Ticket ticket = createTicket(client, manager, random.nextFloat() * 1000);
-                    tickets.add(ticket);
-                    
-                    // Associer le billet au vol
-                    FlightTicket flightTicket = createFlightTicket(ticket, flight);
-                    flightTicketRepository.save(flightTicket);
+                // Créer un ticket et plusieurs segments de vol (escales)
+                User manager = managers.get(random.nextInt(managers.size()));
+                Ticket ticket = createTicket(client, manager, random.nextFloat() * 1000);
+                ticketRepository.save(ticket);
+                tickets.add(ticket);
+
+                // Segments du billet
+                int nbSegments = 1 + random.nextInt(3);
+                Collections.shuffle(flights, random);
+                for (int j = 0; j < nbSegments; j++) {
+                    Flight flight = flights.get(j);
+                    if (!flight.getOpenBuy()) continue;
+                    FlightTicket ft = createFlightTicket(ticket, flight);
+                    flightTicketRepository.save(ft);
                 }
             }
         }
@@ -313,14 +333,10 @@ public class DataInitializationService {
         Random random = new Random();
         
         for (Ticket ticket : tickets) {
-            // Vérifier si le billet a au moins un vol
-            if (!ticket.getFlightTickets().isEmpty()) {
-                // Récupérer le premier vol associé au billet
-                Flight flight = ticket.getFlightTickets().iterator().next().getFlight();
-                
-                // Vérifier si le vol est ouvert à l'enregistrement
-                if (flight.getOpenRegistration()) {
-                    // 70% de chance de créer un enregistrement
+            List<FlightTicket> fts = flightTicketRepository.findByTicketId(ticket.getId());
+            if (!fts.isEmpty()) {
+                Flight flight = fts.get(0).getFlight();
+                if (Boolean.TRUE.equals(flight.getOpenRegistration())) {
                     if (random.nextDouble() < 0.7) {
                         CheckIn checkIn = createCheckIn(ticket, random.nextInt(3), random.nextInt(flight.getAeroplane().getCapacity()) + 1);
                         checkIns.add(checkIn);
@@ -337,8 +353,40 @@ public class DataInitializationService {
         CheckIn checkIn = new CheckIn();
         checkIn.setTicket(ticket);
         checkIn.setLuggageNr(luggageNr);
+        // Calcul du supplément bagage
+        float feePerBag = 30.0f;
+        checkIn.setBaggageFee(luggageNr * feePerBag);
         checkIn.setSeat(seat);
         checkIn.setCheckTime(LocalDateTime.now());
         return checkIn;
+    }
+
+    @Transactional
+    public void initializeUsers() {
+        // Crée ou met à jour les utilisateurs par défaut
+        String defaultRaw = "password";
+        String defaultPwd = passwordEncoder.encode(defaultRaw);
+        Optional<User> managerOpt = userRepository.findByEmail("manager@bluesky.com");
+        if (managerOpt.isPresent()) {
+            User manager = managerOpt.get();
+            manager.setPassword(defaultPwd);
+            userRepository.save(manager);
+            System.out.println("Manager mis à jour.");
+        } else {
+            User manager = new User(null, "Manager", "manager@bluesky.com", defaultPwd, "MANAGER", null);
+            userRepository.save(manager);
+            System.out.println("Manager créé.");
+        }
+        Optional<User> hostessOpt = userRepository.findByEmail("hostess@bluesky.com");
+        if (hostessOpt.isPresent()) {
+            User hostess = hostessOpt.get();
+            hostess.setPassword(defaultPwd);
+            userRepository.save(hostess);
+            System.out.println("Hostess mis à jour.");
+        } else {
+            User hostess = new User(null, "Hostess", "hostess@bluesky.com", defaultPwd, "HOSTESS", null);
+            userRepository.save(hostess);
+            System.out.println("Hostess créé.");
+        }
     }
 }
