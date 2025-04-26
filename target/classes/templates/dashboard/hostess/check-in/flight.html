@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::section})}">
-<head>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head(~{::title})">
     <title>Blue Sky - Enregistrements du Vol</title>
 </head>
-<body>
-    <section th:fragment="content">
-        <div th:replace="~{layout/base :: hostess-sidebar}"></div>
-        
-        <div class="content">
-            <div class="container mx-auto px-4 py-8">
+<body class="bg-gray-100 min-h-screen">
+    <div th:replace="layout/base :: header"></div>
+    <div class="flex h-screen" sec:authorize="isAuthenticated()">
+        <div th:replace="layout/base :: sidebar-hostess"></div>
+        <main class="flex-1 p-6 overflow-auto">
+            <div class="content container mx-auto px-4 py-8">
                 <div class="flex items-center justify-between mb-6">
                     <h1 class="text-3xl font-bold">Enregistrements - Vol <span th:text="${flight.flightNr}"></span></h1>
                     <a th:href="@{/hostess/check-in}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
@@ -149,7 +149,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </main>
+    </div>
 </body>
 </html>

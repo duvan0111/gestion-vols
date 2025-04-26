@@ -2,19 +2,21 @@ package com.bluesky.gestionvols.controller;
 
 import com.bluesky.gestionvols.model.CheckIn;
 import com.bluesky.gestionvols.model.Flight;
+import com.bluesky.gestionvols.model.FlightTicket;
 import com.bluesky.gestionvols.model.Ticket;
 import com.bluesky.gestionvols.service.CheckInService;
 import com.bluesky.gestionvols.service.FlightService;
 import com.bluesky.gestionvols.service.TicketService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/hostess/check-in")
@@ -23,6 +25,7 @@ public class CheckInController {
     private final CheckInService checkInService;
     private final FlightService flightService;
     private final TicketService ticketService;
+    private static final Logger logger = LoggerFactory.getLogger(CheckInController.class);
 
     public CheckInController(CheckInService checkInService, 
                             FlightService flightService, 
@@ -30,17 +33,6 @@ public class CheckInController {
         this.checkInService = checkInService;
         this.flightService = flightService;
         this.ticketService = ticketService;
-    }
-
-    @GetMapping
-    public String checkInDashboard(Model model, 
-                                  @RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "100") int size) {
-        Page<Flight> flights = flightService.getOpenRegistrationFlights(PageRequest.of(page, size));
-        model.addAttribute("flights", flights);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", flights.getTotalPages());
-        return "dashboard/hostess/check-in/index";
     }
 
     @GetMapping("/flight/{flightId}")
@@ -69,24 +61,22 @@ public class CheckInController {
         return "dashboard/hostess/check-in/flight";
     }
 
-    @GetMapping("/create/{flightId}/{ticketId}")
-    public String showCheckInForm(@PathVariable Integer flightId, 
-                                 @PathVariable Integer ticketId, 
-                                 Model model) {
-        Optional<Flight> flightOpt = flightService.getFlightById(flightId);
-        Optional<Ticket> ticketOpt = ticketService.getTicketById(ticketId);
-        
-        if (!flightOpt.isPresent() || !ticketOpt.isPresent()) {
-            return "redirect:/hostess/check-in/flight/" + flightId + "?error=Vol ou billet non trouvé";
+    @GetMapping("/create")
+    public String showCreateForm(@RequestParam(required = false) Integer ticketId,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes) {
+        if (ticketId == null) {
+            return "dashboard/hostess/check-in/create";
         }
-        
-        Flight flight = flightOpt.get();
+        Optional<Ticket> ticketOpt = ticketService.getTicketById(ticketId);
+        if (!ticketOpt.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Billet non trouvé");
+            return "redirect:/hostess/check-in/create";
+        }
         Ticket ticket = ticketOpt.get();
-        
-        model.addAttribute("flight", flight);
         model.addAttribute("ticket", ticket);
-        model.addAttribute("availableSeats", checkInService.getAvailableSeatsCount(flightId));
-        
+        var flights = ticket.getFlightTickets().stream().map(FlightTicket::getFlight).collect(Collectors.toList());
+        model.addAttribute("flights", flights);
         return "dashboard/hostess/check-in/create";
     }
 
@@ -96,13 +86,14 @@ public class CheckInController {
                                @RequestParam Integer luggageNr,
                                @RequestParam(required = false) Integer seat,
                                RedirectAttributes redirectAttributes) {
+        logger.info("createCheckIn called with ticketId={}, flightId={}, luggageNr={}, seat={}", ticketId, flightId, luggageNr, seat);
         try {
             CheckIn checkIn = checkInService.createCheckIn(ticketId, flightId, luggageNr);
             redirectAttributes.addFlashAttribute("success", "Enregistrement créé avec succès");
             return "redirect:/hostess/check-in/flight/" + flightId;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de la création de l'enregistrement: " + e.getMessage());
-            return "redirect:/hostess/check-in/create/" + flightId + "/" + ticketId;
+            return "redirect:/hostess/check-in/create?ticketId=" + ticketId;
         }
     }
 
@@ -157,7 +148,7 @@ public class CheckInController {
             checkInService.deleteCheckIn(ticketId);
             
             redirectAttributes.addFlashAttribute("success", "Enregistrement supprimé avec succès");
-            return "redirect:/hostess/check-in/flight/" + flightId;
+            return "redirect:/hostess/check-in";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de la suppression de l'enregistrement: " + e.getMessage());
             return "redirect:/hostess/check-in";
@@ -179,5 +170,23 @@ public class CheckInController {
         model.addAttribute("checkIns", checkIns);
         
         return "dashboard/hostess/check-in/passenger-list";
+    }
+
+    @GetMapping
+    public String listAll(Model model) {
+        List<CheckIn> checkIns = checkInService.getAllCheckIns();
+        model.addAttribute("checkIns", checkIns);
+        return "dashboard/hostess/check-in/index";
+    }
+
+    @GetMapping("/{ticketId:\\d+}")
+    public String showDetail(@PathVariable Integer ticketId, Model model, RedirectAttributes redirectAttributes) {
+        Optional<CheckIn> checkInOpt = checkInService.getCheckInByTicketId(ticketId);
+        if (!checkInOpt.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Enregistrement non trouvé");
+            return "redirect:/hostess/check-in";
+        }
+        model.addAttribute("checkIn", checkInOpt.get());
+        return "dashboard/hostess/check-in/detail";
     }
 }
